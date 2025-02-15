@@ -37,7 +37,7 @@ const Prompt = () => {
     const handleKeyDown = async (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        await handleSubmit(e as any);
+        await handleSubmit(e);
       }
     };
 
