@@ -5,6 +5,7 @@ import { TypingAnimation } from "@/components/magicui/typing-animation";
 import { Doto } from "next/font/google";
 import Image from "next/image";
 const doto = Doto({ subsets: ['latin'] }); // Initialize the font
+import { trainmachine } from "../trainmachine";
 
 const Prompt = () => {
     const [prompt, setPrompt] = useState("");
@@ -18,10 +19,11 @@ const Prompt = () => {
       setIsLoading(true);
   
       try {
-        console.log(process.env.NEXT_PUBLIC_GITHUB_TOKEN);
-        const result = await main(prompt);
+        const updatedHistory = Array.from(new Set([...history, prompt]));
+        const trained = await trainmachine(["hello", ...updatedHistory]);
+        console.log(trained);
+        const result = await main(prompt, trained);
         setResponse(result || "");
-        const updatedHistory = [...history, prompt];
         setHistory(updatedHistory);
         localStorage.setItem("promptHistory", JSON.stringify(updatedHistory));
       } catch (error) {
@@ -31,15 +33,23 @@ const Prompt = () => {
         setIsLoading(false);
       }
     };
-  
+
+    const handleKeyDown = async (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        await handleSubmit(e as any);
+      }
+    };
+
     return (
-      <main className="bg-black flex min-h-screen flex-col items-center justify-between p-24">
+      <main className="bg-black flex min-h-screen flex-col items-center justify-between p-4 md:p-24">
         <div className="w-full max-w-2xl">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        
+          <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4">
             {/* Image display option */}
             <div className="flex justify-center flex-col items-center">
-              <Image src="/404logo.png" alt="Description of image" className="w-auto h-auto rounded-lg pd-8" />
-              <TypingAnimation className={`${doto.className} text-white`}>Intelligence Not Found!</TypingAnimation>
+              <Image src="/404logo.png" alt="Description of image" width={100} height={100} className="w-24 h-24 md:w-32 md:h-32 rounded-lg pd-8" />
+              <TypingAnimation className={`${doto.className} text-white text-center`}>Intelligence Not Found!</TypingAnimation>
             </div>
             <textarea
               value={prompt}
@@ -65,16 +75,20 @@ const Prompt = () => {
           )}
   
           {/* Displaying the history of prompts */}
-          {/* <div className="mt-8">
-            <h2 className="text-xl font-bold mb-2">Previous Questions:</h2>
-            <ul className="list-disc pl-5">
-              {history.map((item, index) => (
-                <li key={index} className="font-mono">
-                  {item}
-                </li>
-              ))}
+          <div className="mt-8">
+            <h2 className="text-xl font-bold mb-2 text-white">Previous Questions:</h2>
+            <ul className="list-disc pl-5 text-white">
+              {history.length > 0 ? (
+                history.filter(item => item !== "hello").map((item, index) => (
+                  <li key={index} className="font-mono">
+                    {item}
+                  </li>
+                ))
+              ) : (
+                <li className="font-mono text-gray-500">No previous questions.</li>
+              )}
             </ul>
-          </div> */}
+          </div>
         </div>
       </main>
     );

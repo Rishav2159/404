@@ -4,7 +4,7 @@ import { AzureKeyCredential } from "@azure/core-auth";
 import dotenv from "dotenv";
 dotenv.config();
 
-export async function main(prompt) {
+export async function main(prompt,trained) {
     const client = ModelClient(
         "https://models.github.ai/inference",
         new AzureKeyCredential(process.env.NEXT_PUBLIC_GITHUB_TOKEN)
@@ -14,7 +14,7 @@ export async function main(prompt) {
     const response = await client.path("/chat/completions").post({
         body: {
             messages: [
-                { role: "system", content: ""},
+                { role: "system", content: trained},
                 { role: "user", content: prompt }
             ],
             model: "Mistral-small",
