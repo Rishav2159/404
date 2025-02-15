@@ -21,7 +21,6 @@ const Prompt = () => {
       try {
         const updatedHistory = Array.from(new Set([...history, prompt]));
         const trained = await trainmachine(["hello", ...updatedHistory]);
-        console.log(trained);
         const result = await main(prompt, trained);
         setResponse(result || "");
         setHistory(updatedHistory);
