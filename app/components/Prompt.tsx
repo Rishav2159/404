@@ -1,11 +1,13 @@
 "use client";
 import { useState} from "react";
-import { main } from "../gpt";
+import { main } from "../../api/gpt";
 import { TypingAnimation } from "@/components/magicui/typing-animation";
 import { Doto } from "next/font/google";
-import Image from "next/image";
-const doto = Doto({ subsets: ['latin'] }); // Initialize the font
-import { trainmachine } from "../trainmachine";
+import { Rubik_Glitch } from "next/font/google";
+import { motion } from "framer-motion";
+const doto = Doto({ subsets: ['latin'] });
+const rubikGlitch = Rubik_Glitch({ weight :"400", subsets: ['latin'] });
+import { trainmachine } from "../../api/trainmachine";
 
 const Prompt = () => {
     const [prompt, setPrompt] = useState("");
@@ -41,42 +43,58 @@ const Prompt = () => {
     };
 
     return (
-      <main className="bg-black flex min-h-screen flex-col items-center justify-between p-4 md:p-24">
+      <motion.main 
+        className="bg-zinc-950 flex min-h-screen flex-col items-center justify-between p-4 md:p-24 pt-16"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="w-full max-w-2xl">
-        
-          <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4">
+          <motion.form 
+            onSubmit={handleSubmit} 
+            onKeyDown={handleKeyDown} 
+            className="space-y-4"
+            initial={{ y: -20 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             {/* Image display option */}
-            <div className="flex justify-center flex-col items-center">
-              <Image src="/404logo.png" alt="Description of image" width={100} height={100} className="w-24 h-24 md:w-32 md:h-32 rounded-lg pd-8" />
-              <TypingAnimation className={`${doto.className} text-white text-center`}>Intelligence Not Found!</TypingAnimation>
+            <div className="flex justify-center flex-col items-center mt-10">
+              <h1 className={`${rubikGlitch.className} text-zinc-300 text-center text-8xl`}>404</h1>
+              <TypingAnimation className={`${doto.className} text-zinc-300 text-center`}>Intelligence Not Found!</TypingAnimation>
             </div>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Enter your prompt here..."
-              className="w-full p-4 border rounded-lg font-mono text-black"
+              className="w-full p-4 border rounded font-mono bg-zinc-100 text-black"
               rows={4}
             />
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+              className="w-full p-4 bg-zinc-700  text-white rounded hover:bg-zinc-600 disabled:opacity-50"
             >
               {isLoading ? "Processing..." : "Submit"}
             </button>
-          </form>
+          </motion.form>
   
           {response && (
-            <div className="mt-8 p-4 border rounded-lg">
+            <motion.div 
+              className="mt-8 p-4 border rounded-lg"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
               <h2 className="text-xl font-bold mb-2 text-white">Response:</h2>
               <p className="whitespace-pre-wrap font-mono text-white">{response}</p>
-            </div>
+            </motion.div>
           )}
   
           {/* Displaying the history of prompts */}
           <div className="mt-8">
-            <h2 className="text-xl font-bold mb-2 text-white">Previous Questions:</h2>
-            <ul className="list-disc pl-5 text-white">
+            <h2 className="text-xl font-bold mb-2 text-zinc-300">Previous Questions:</h2>
+            <ul className="list-disc pl-5 text-zinc-300">
               {history.length > 0 ? (
                 history.filter(item => item !== "hello").map((item, index) => (
                   <li key={index} className="font-mono">
@@ -89,7 +107,7 @@ const Prompt = () => {
             </ul>
           </div>
         </div>
-      </main>
+      </motion.main>
     );
 };
 
