@@ -9,7 +9,7 @@ const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
 
 export async function trainmachine(array) {
     const client = ModelClient(
-        "https://models.inference.ai.azure.com",
+        "https://models.github.ai/inference",
         new AzureKeyCredential(token)
     );
 
