@@ -6,7 +6,7 @@ dotenv.config();
 
 export async function main(prompt,trained) {
     const client = ModelClient(
-        "https://models.inference.ai.azure.com",
+        "https://models.github.ai/inference",
         new AzureKeyCredential(process.env.NEXT_PUBLIC_GITHUB_TOKEN)
         
     );
