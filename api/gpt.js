@@ -6,7 +6,7 @@ dotenv.config();
 
 export async function main(prompt,trained) {
     const client = ModelClient(
-        "https://models.inference.ai.azure.com",
+        "https://models.github.ai/inference",
         new AzureKeyCredential(process.env.NEXT_PUBLIC_GITHUB_TOKEN)
         
     );
@@ -17,7 +17,7 @@ export async function main(prompt,trained) {
                 { role: "system", content: trained},
                 { role: "user", content: prompt }
             ],
-            model: "Mistral-small",
+            model: "mistral-ai/Mistral-small-2503",
             temperature: 0.8,
             max_tokens: 2048,
             top_p: 0.1
