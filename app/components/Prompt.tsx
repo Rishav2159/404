@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { main } from "../../api/gpt";
 import { TypingAnimation } from "@/components/magicui/typing-animation";
 import { Doto } from "next/font/google";
@@ -52,12 +52,21 @@ const Prompt = () => {
     const [prompt, setPrompt] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [messages, setMessages] = useState<{ text: string; type: 'user' | 'ai' }[]>([]); // Message pairs
+    const [currentStreamingMessage, setCurrentStreamingMessage] = useState("");
+    const chatContainerRef = useRef<HTMLDivElement>(null);
 
     // Clear localStorage when the component mounts (on page reload)
     useEffect(() => {
         localStorage.removeItem("chatHistory"); // Clear chat history from localStorage on reload
         setMessages([]); // Set messages to an empty array to reset the chat
     }, []);
+
+    // Scroll to bottom when messages change
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages, currentStreamingMessage]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,18 +76,70 @@ const Prompt = () => {
         setMessages(prev => [...prev, userMessage]);
         setPrompt(""); // Clear input immediately
         setIsLoading(true);
+        setCurrentStreamingMessage("");
 
         try {
-            const trained = await trainmachine(["hello", ...messages.map(msg => msg.text), prompt]);
-            const result = await main(prompt, trained);
+            const response = await fetch('/api/stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream',
+                },
+                body: JSON.stringify({
+                    prompt,
+                    messages: messages.map(msg => ({ text: msg.text, type: msg.type }))
+                }),
+                cache: 'no-store',
+            });
 
-            const aiMessage = { text: result || "No response", type: 'ai' as const };
-            setMessages(prev => [...prev, aiMessage]);
-            localStorage.setItem("chatHistory", JSON.stringify([...messages, userMessage, aiMessage]));
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Network response was not ok');
+            }
+
+            if (!response.body) {
+                throw new Error('No response body available');
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedMessage = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.token) {
+                                accumulatedMessage += data.token;
+                                setCurrentStreamingMessage(accumulatedMessage);
+                            }
+                            if (data.done) {
+                                const aiMessage = { text: data.result, type: 'ai' as const };
+                                setMessages(prev => [...prev, aiMessage]);
+                                setCurrentStreamingMessage("");
+                                localStorage.setItem("chatHistory", JSON.stringify([...messages, userMessage, aiMessage]));
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                        }
+                    }
+                }
+            }
         } catch (error) {
             console.error("Error:", error);
-            const errorMessage = { text: "An error occurred while processing your request.", type: 'ai' as const };
+            const errorMessage = { 
+                text: error instanceof Error ? error.message : "An error occurred while processing your request.", 
+                type: 'ai' as const 
+            };
             setMessages(prev => [...prev, errorMessage]);
+            setCurrentStreamingMessage("");
         } finally {
             setIsLoading(false);
         }
@@ -104,7 +165,7 @@ const Prompt = () => {
         
         return parts.map((part, index) => {
             if (part.type === 'text') {
-                return <div key={index} className="p-4 whitespace-pre-wrap">{part.content}</div>;
+                return <div key={index} className="p-4 whitespace-pre-wrap break-words">{part.content.trim()}</div>;
             }
             
             return (
@@ -133,7 +194,7 @@ const Prompt = () => {
                                 background: 'transparent',
                             }}
                         >
-                            {part.content}
+                            {part.content.trim()}
                         </SyntaxHighlighter>
                     </div>
                 </div>
@@ -162,11 +223,11 @@ const Prompt = () => {
             <div className={`w-full max-w-4xl space-y-8 ${messages.length === 0 ? 'flex-grow flex items-center justify-center' : ''}`}>
                 {/* Chat History */}
                 {messages.length > 0 && (
-                    <div className="space-y-4 overflow-auto h-[60vh] scrollbar-hide p-4">
+                    <div ref={chatContainerRef} className="space-y-4 overflow-auto h-[60vh] scrollbar-hide p-4">
                         {messages.map((message, index) => (
                             <motion.div
                                 key={index}
-                                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3 }}
@@ -185,9 +246,20 @@ const Prompt = () => {
                                 </motion.div>
                             </motion.div>
                         ))}
-                        {isLoading && (
+                        {isLoading && currentStreamingMessage && (
                             <motion.div 
-                                className="flex justify-start"
+                                className="flex justify-start mb-4"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                            >
+                                <div className="bg-zinc-800/30 text-zinc-100 rounded-2xl">
+                                    {renderMessageContent(currentStreamingMessage)}
+                                </div>
+                            </motion.div>
+                        )}
+                        {isLoading && !currentStreamingMessage && (
+                            <motion.div 
+                                className="flex justify-start mb-4"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                             >
