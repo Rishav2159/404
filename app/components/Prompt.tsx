@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { main } from "../../api/gpt";
 import { TypingAnimation } from "@/components/magicui/typing-animation";
 import { Doto } from "next/font/google";
 import { Rubik_Glitch } from "next/font/google";
@@ -9,7 +8,6 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 const doto = Doto({ subsets: ['latin'] });
 const rubikGlitch = Rubik_Glitch({ weight: "400", subsets: ['latin'] });
-import { trainmachine } from "../../api/trainmachine";
 
 // Function to detect code blocks in text
 const detectCodeBlocks = (text: string) => {

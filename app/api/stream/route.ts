@@ -25,7 +25,6 @@ export async function POST(req: Request) {
         // Rate limiting
         const ip = req.headers.get('x-forwarded-for') || 'unknown';
         const now = Date.now();
-        const windowStart = now - RATE_LIMIT.windowMs;
 
         const rateLimit = RATE_LIMIT.store.get(ip) || { count: 0, resetTime: now + RATE_LIMIT.windowMs };
         
@@ -66,7 +65,7 @@ export async function POST(req: Request) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    array: ["hello", ...messages.map((msg: any) => msg.text), prompt]
+                    array: ["hello", ...messages.map((msg: { text: string; type: string }) => msg.text), prompt]
                 }),
                 signal: controller.signal
             });

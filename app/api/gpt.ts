@@ -216,7 +216,7 @@ Response:`;
                                     }
                                 }
                             }
-                        } catch (e) {
+                        } catch {
                             // Silent error handling for malformed JSON
                         }
                     }
@@ -246,7 +246,7 @@ Response:`;
                             }
                         }
                     }
-                } catch (e) {
+                } catch {
                     // Silent error handling for malformed JSON
                 }
             }
