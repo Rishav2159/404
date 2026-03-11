@@ -1,123 +1,72 @@
 import { NextResponse } from 'next/server';
-import { main } from '@/app/api/gpt';
+import { streamChat } from '@/app/api/gpt';
 
-export const runtime = 'edge';
-
-// Rate limiting configuration
-const RATE_LIMIT = {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30, // 30 requests per minute
-    store: new Map<string, { count: number; resetTime: number }>()
-};
-
-// Clean up old rate limit entries
-setInterval(() => {
-    const now = Date.now();
-    for (const [key, value] of RATE_LIMIT.store.entries()) {
-        if (now > value.resetTime) {
-            RATE_LIMIT.store.delete(key);
-        }
-    }
-}, 60 * 1000);
+// Rate limiting
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000;
+const RATE_LIMIT_MAX = 30;
 
 export async function POST(req: Request) {
     try {
-        // Rate limiting
-        const ip = req.headers.get('x-forwarded-for') || 'unknown';
+        const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
         const now = Date.now();
 
-        const rateLimit = RATE_LIMIT.store.get(ip) || { count: 0, resetTime: now + RATE_LIMIT.windowMs };
-        
-        if (rateLimit.resetTime < now) {
-            rateLimit.count = 0;
-            rateLimit.resetTime = now + RATE_LIMIT.windowMs;
-        }
+        const rateLimit = rateLimitStore.get(ip) || { count: 0, resetTime: now + RATE_LIMIT_WINDOW };
+        if (rateLimit.resetTime < now) { rateLimit.count = 0; rateLimit.resetTime = now + RATE_LIMIT_WINDOW; }
 
-        if (rateLimit.count >= RATE_LIMIT.maxRequests) {
-            return NextResponse.json({ 
-                error: 'Too many requests, please try again later' 
-            }, { 
-                status: 429,
-                headers: {
-                    'Retry-After': Math.ceil((rateLimit.resetTime - now) / 1000).toString()
-                }
-            });
+        if (rateLimit.count >= RATE_LIMIT_MAX) {
+            return NextResponse.json(
+                { error: 'Too many requests. Please wait a moment and try again.' },
+                { status: 429, headers: { 'Retry-After': Math.ceil((rateLimit.resetTime - now) / 1000).toString() } }
+            );
         }
 
         rateLimit.count++;
-        RATE_LIMIT.store.set(ip, rateLimit);
-
-        // Parse request body
-        const { prompt, messages } = await req.json();
-        
-        if (!prompt) {
-            return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
+        rateLimitStore.set(ip, rateLimit);
+        if (rateLimitStore.size > 100) {
+            for (const [key, value] of rateLimitStore.entries()) {
+                if (now > value.resetTime) rateLimitStore.delete(key);
+            }
         }
 
-        // Get training data with timeout
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const { prompt, messages = [], model, systemPrompt, isRegenerate } = await req.json();
 
-        try {
-            const trainingResponse = await fetch(new URL('/api/train', req.url), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    array: ["hello", ...messages.map((msg: { text: string; type: string }) => msg.text), prompt]
-                }),
-                signal: controller.signal
-            });
+        if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+            return NextResponse.json({ error: 'Please enter a message.' }, { status: 400 });
+        }
 
-            clearTimeout(timeout);
+        const encoder = new TextEncoder();
+        const stream = new ReadableStream({
+            async start(controller) {
+                try {
+                    const result = await streamChat(prompt, messages, (token: string) => {
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`));
+                    }, { model, systemPrompt, isRegenerate });
 
-            if (!trainingResponse.ok) {
-                const error = await trainingResponse.json();
-                throw new Error(error.error || 'Training failed');
-            }
-
-            const { result: trained } = await trainingResponse.json();
-
-            const encoder = new TextEncoder();
-            const stream = new ReadableStream({
-                async start(controller) {
-                    try {
-                        // Get the response with token streaming
-                        const result = await main(prompt, trained, (token: string) => {
-                            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ token })}\n\n`));
-                        });
-                        
-                        // Send the final message
-                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
-                        controller.close();
-                    } catch (error) {
-                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-                            error: error instanceof Error ? error.message : 'An error occurred' 
-                        })}\n\n`));
-                        controller.close();
-                    }
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
+                    controller.close();
+                } catch (error) {
+                    console.error("[stream] Error:", error);
+                    const errorMsg = error instanceof Error ? error.message : 'An error occurred';
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: errorMsg })}\n\n`));
+                    controller.close();
                 }
-            });
-
-            return new NextResponse(stream, {
-                headers: {
-                    'Content-Type': 'text/event-stream',
-                    'Cache-Control': 'no-cache, no-transform',
-                    'Connection': 'keep-alive',
-                    'X-Accel-Buffering': 'no',
-                },
-            });
-        } catch (error) {
-            clearTimeout(timeout);
-            if (error instanceof Error && error.name === 'AbortError') {
-                return NextResponse.json({ error: 'Training request timed out' }, { status: 504 });
             }
-            throw error;
-        }
+        });
+
+        return new NextResponse(stream, {
+            headers: {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache, no-transform',
+                'Connection': 'keep-alive',
+                'X-Accel-Buffering': 'no',
+            },
+        });
     } catch (error) {
-        return NextResponse.json({ 
-            error: error instanceof Error ? error.message : 'Internal server error' 
-        }, { status: 500 });
+        console.error("[stream] Internal error:", error);
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : 'Internal server error' },
+            { status: 500 }
+        );
     }
-} 
+}

@@ -1,6 +1,5 @@
 "use client";
 import { motion } from "framer-motion";
-import { TypingAnimation } from "@/components/magicui/typing-animation";
 import emailjs from 'emailjs-com';
 
 export default function Contact() {
@@ -18,89 +17,111 @@ export default function Contact() {
 
     emailjs.sendForm(serviceId, templateId, event.currentTarget, userId)
       .then(() => {
-        alert('Email sent successfully!');
+        alert('Message sent successfully!');
       }, (error) => {
         console.error('Error:', error);
-        alert(`Failed to send email. Error: ${error.text || 'Unknown error'}`);
+        alert(`Failed to send message. Error: ${error.text || 'Unknown error'}`);
       });
   };
 
   return (
-    <motion.div 
-      className="bg-zinc-950 min-h-screen pt-20 px-4 sm:px-6 lg:px-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen py-10 px-4 md:px-8">
+      <div className="max-w-xl mx-auto">
+        {/* Header */}
         <motion.div
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-12"
+          className="mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
         >
-          <TypingAnimation className="text-4xl font-bold text-zinc-300 mb-4 sm:text-5xl">
-            Contact
-          </TypingAnimation>
-          <div className="w-24 h-1 bg-zinc-700 mx-auto"></div>
+          <h1 className="text-2xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+            Get in touch
+          </h1>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Have a question or feedback? Send us a message and we&apos;ll get back to you within 24–48 hours.
+          </p>
         </motion.div>
 
+        {/* Form */}
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="bg-zinc-900 p-6 sm:p-8 rounded-lg shadow-2xl border border-zinc-800"
+          className="surface-card p-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-zinc-500 mb-2 font-mono">Identification</label>
-              <input 
-                type="text" 
+              <label
+                htmlFor="contact-name"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Name
+              </label>
+              <input
+                id="contact-name"
+                type="text"
                 name="designation"
-                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-zinc-700 font-mono"
-                placeholder="Enter your designation..."
-              />
-            </div>
-            
-            <div>
-              <label className="block text-zinc-500 mb-2 font-mono">Communication Channel</label>
-              <input 
-                type="email" 
-                name="email"
-                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-zinc-700 font-mono"
-                placeholder="Enter your email address..."
+                className="input-field w-full px-3 py-2.5"
+                placeholder="Your name"
               />
             </div>
 
             <div>
-              <label className="block text-zinc-500 mb-2 font-mono">Message Payload</label>
-              <textarea 
+              <label
+                htmlFor="contact-email"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Email
+              </label>
+              <input
+                id="contact-email"
+                type="email"
+                name="email"
+                className="input-field w-full px-3 py-2.5"
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="contact-message"
+                className="block text-sm font-medium mb-1.5"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Message
+              </label>
+              <textarea
+                id="contact-message"
                 name="message"
-                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-300 p-3 rounded h-32 focus:outline-none focus:ring-2 focus:ring-zinc-700 font-mono"
-                placeholder="Enter your message..."
+                className="input-field w-full px-3 py-2.5"
+                style={{ minHeight: '140px', resize: 'vertical' }}
+                placeholder="What would you like to say?"
               />
             </div>
 
             <button
-              className="w-full bg-zinc-800 text-zinc-300 py-3 rounded font-mono hover:bg-zinc-700 transition-colors"
+              id="contact-submit"
               type="submit"
+              className="btn-primary w-full py-2.5"
             >
-              TRANSMIT MESSAGE
+              Send message
             </button>
           </form>
         </motion.div>
 
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="mt-8 text-center text-zinc-600 font-mono"
+        {/* Info */}
+        <motion.p
+          className="text-center text-[12px] mt-6"
+          style={{ color: 'var(--text-faint)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
         >
-          <p className="text-sm sm:text-base">SECURE TRANSMISSION PROTOCOL ENABLED</p>
-          <p className="text-sm sm:text-base">RESPONSE TIME: 24-48 HOURS</p>
-        </motion.div>
+          Your message is sent securely. We typically respond within 24–48 hours.
+        </motion.p>
       </div>
-    </motion.div>
+    </div>
   );
 }
-

@@ -1,128 +1,198 @@
 "use client";
 import { motion } from "framer-motion";
-import { TypingAnimation } from "@/components/magicui/typing-animation";
+
+const models = [
+  {
+    name: "Mistral-Small",
+    status: "Primary",
+    statusColor: "var(--accent)",
+    specs: [
+      "High throughput logic routing",
+      "32k base context window",
+      "Optimized for concise, accurate outputs",
+      "Low latency inference",
+    ],
+  },
+  {
+    name: "Ministral-3B",
+    status: "Fallback",
+    statusColor: "var(--text-muted)",
+    specs: [
+      "Enhanced context understanding",
+      "3B parameter foundation model",
+      "Robust reasoning capabilities",
+      "Efficient resource utilization",
+    ],
+  },
+];
+
+const metrics = [
+  { label: "Response Latency", value: "<500ms" },
+  { label: "Memory Utilization", value: "0.0 MB" },
+  { label: "Token Processing", value: "4K/request" },
+  { label: "Model Switch Time", value: "50ms" },
+];
+
+const techStack = [
+  "Next.js with React Server Components",
+  "Tailwind CSS with custom design system",
+  "Framer Motion for transitions",
+  "React Hooks with local storage integration",
+  "Dual model pipeline with fallback support",
+];
 
 export default function About() {
   return (
-    <motion.div 
-      className="bg-zinc-950 min-h-screen pt-20 px-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen py-10 px-4 md:px-8">
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
         <motion.div
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-12"
+          className="mb-10"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
         >
-          <TypingAnimation className="text-4xl font-bold text-zinc-300 mb-4">
-            Technical Documentation
-          </TypingAnimation>
-          <div className="w-24 h-1 bg-zinc-700 mx-auto"></div>
+          <h1 className="text-2xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+            About 404 Intelligence
+          </h1>
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            A unique approach to AI interaction — designed with complete memory erasure between sessions.
+            Every conversation starts from zero.
+          </p>
         </motion.div>
 
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="bg-zinc-900 p-8 rounded-lg shadow-2xl border border-zinc-800"
+        {/* Overview */}
+        <motion.section
+          className="mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <div className="space-y-6 font-mono text-zinc-400">
-            <div>
-              <h2 className="text-lg md:text-xl text-zinc-300 mb-2">[PROJECT OVERVIEW]</h2>
-              <p className="text-sm md:text-base">404-Intelligence-Not-Found represents a unique approach to AI interaction, deliberately designed to challenge traditional machine learning paradigms. By implementing complete memory erasure between sessions, we explore the boundaries of contextless intelligence.</p>
-            </div>
-
-            <div>
-              <h2 className="text-lg md:text-xl text-zinc-300 mb-2">[AI MODELS DEPLOYED]</h2>
-              <div className="space-y-4">
-                <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
-                  <h3 className="text-zinc-300 text-sm md:text-base">Mistral-Small</h3>
-                  <ul className="list-disc pl-5 mt-2 text-sm md:text-base">
-                    <li>Optimized for rapid response generation</li>
-                    <li>3B parameter architecture</li>
-                    <li>Specialized in concise, accurate outputs</li>
-                    <li>Low latency inference</li>
-                  </ul>
-                </div>
-                <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
-                  <h3 className="text-zinc-300 text-sm md:text-base">Ministral-3B</h3>
-                  <ul className="list-disc pl-5 mt-2 text-sm md:text-base">
-                    <li>Enhanced context understanding</li>
-                    <li>3B parameter foundation model</li>
-                    <li>Robust reasoning capabilities</li>
-                    <li>Efficient resource utilization</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-lg md:text-xl text-zinc-300 mb-2">[TECHNICAL ARCHITECTURE]</h2>
-              <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
-                <li>Frontend: Next.js 14 with React Server Components</li>
-                <li>Styling: TailwindCSS with custom animations</li>
-                <li>Motion: Framer Motion for fluid transitions</li>
-                <li>State Management: React Hooks with local storage integration</li>
-                <li>AI Integration: Dual model pipeline with fallback support</li>
-              </ul>
-            </div>
-
-            <div>
-              <h2 className="text-lg md:text-xl text-zinc-300 mb-2">[CORE CAPABILITIES]</h2>
-              <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
-                <li>Multi-model inference with automatic failover</li>
-                <li>Real-time response generation with zero context dependency</li>
-                <li>Secure data handling with immediate post-processing cleanup</li>
-                <li>Dynamic model selection based on query complexity</li>
-                <li>Cross-model response validation</li>
-              </ul>
-            </div>
-
-            <div>
-              <h2 className="text-lg md:text-xl text-zinc-300 mb-2">[SYSTEM METRICS]</h2>
-              <div className="grid grid-cols-2 gap-4 text-sm md:text-base">
-                <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
-                  <p className="text-zinc-500">Response Latency</p>
-                  <p className="text-green-500">{"<"}500ms</p>
-                </div>
-                <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
-                  <p className="text-zinc-500">Memory Utilization</p>
-                  <p className="text-blue-500">0.0 MB</p>
-                </div>
-                <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
-                  <p className="text-zinc-500">Token Processing</p>
-                  <p className="text-yellow-500">4K/request</p>
-                </div>
-                <div className="bg-zinc-950 p-4 rounded border border-zinc-800">
-                  <p className="text-zinc-500">Model Switch Time</p>
-                  <p className="text-purple-500">50ms</p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-lg md:text-xl text-zinc-300 mb-2">[RESEARCH IMPLICATIONS]</h2>
-              <p className="text-sm md:text-base">This project explores the potential of multi-model stateless AI systems, challenging the assumption that accumulated knowledge is necessary for meaningful interaction. By leveraging both Mistral-Small and Ministral-3B, we achieve robust performance while maintaining zero-state architecture, suggesting new possibilities in ephemeral intelligence and privacy-first AI design.</p>
-            </div>
+          <h2 className="section-label mb-3">Overview</h2>
+          <div className="surface-card p-5">
+            <p className="text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              404 Intelligence represents a deliberate challenge to traditional machine learning paradigms.
+              By implementing complete memory erasure between sessions, the system operates without persistent
+              conversational buffers or vector databases. Each query-response cycle is completely isolated,
+              ensuring zero data retention — simulating a pure, stateless consciousness loop.
+            </p>
           </div>
-        </motion.div>
+        </motion.section>
 
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="mt-8 text-center text-zinc-600 font-mono"
+        {/* Models */}
+        <motion.section
+          className="mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
         >
-          <p>BUILD: 1.0.0-experimental</p>
-          <p>ENVIRONMENT: production</p>
-          <p>LAST DEPLOYMENT: 2025</p>
-        </motion.div>
+          <h2 className="section-label mb-3">AI Models</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {models.map((model) => (
+              <div key={model.name} className="surface-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {model.name}
+                  </h3>
+                  <span
+                    className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                    style={{
+                      color: model.statusColor,
+                      background: model.status === 'Primary' ? 'var(--accent-subtle)' : 'var(--bg-elevated)',
+                    }}
+                  >
+                    {model.status}
+                  </span>
+                </div>
+                <ul className="space-y-2">
+                  {model.specs.map((spec, i) => (
+                    <li
+                      key={i}
+                      className="text-sm flex items-start gap-2"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      <span className="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style={{ background: 'var(--text-faint)' }} />
+                      {spec}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Metrics */}
+        <motion.section
+          className="mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <h2 className="section-label mb-3">System Metrics</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {metrics.map((m) => (
+              <div key={m.label} className="surface-card p-4 text-center">
+                <p className="text-[11px] mb-1.5" style={{ color: 'var(--text-faint)' }}>
+                  {m.label}
+                </p>
+                <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  {m.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Tech Stack */}
+        <motion.section
+          className="mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+        >
+          <h2 className="section-label mb-3">Technical Architecture</h2>
+          <div className="surface-card p-5">
+            <ul className="space-y-2.5">
+              {techStack.map((item, i) => (
+                <li
+                  key={i}
+                  className="text-sm flex items-start gap-2"
+                  style={{ color: 'var(--text-secondary)' }}
+                >
+                  <span className="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style={{ background: 'var(--text-faint)' }} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </motion.section>
+
+        {/* Research */}
+        <motion.section
+          className="mb-10"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
+          <h2 className="section-label mb-3">Research Implications</h2>
+          <div className="surface-card p-5">
+            <p className="text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              This project explores the potential of multi-model stateless AI systems, challenging the
+              assumption that accumulated knowledge is necessary for meaningful interaction. By leveraging
+              both Mistral-Small and Ministral-3B, we achieve robust performance while maintaining
+              zero-state architecture — suggesting new possibilities in ephemeral intelligence and
+              privacy-first AI design.
+            </p>
+          </div>
+        </motion.section>
+
+        {/* Footer */}
+        <div className="text-center space-y-0.5">
+          <p className="text-[11px]" style={{ color: 'var(--text-faint)' }}>
+            v1.0.0 • Production • Last deployed 2025
+          </p>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
-
-

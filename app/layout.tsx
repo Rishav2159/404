@@ -3,8 +3,8 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 
 export const metadata: Metadata = {
-  title: "404-IntelligenceNotFound",
-  description: "AI that remembers nothing",
+  title: "404 — Intelligence Not Found",
+  description: "A stateless AI assistant with zero memory retention. Powered by Mistral-Small and Ministral-3B.",
 };
 
 export default function RootLayout({
@@ -15,9 +15,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        
-        <Navbar/>
-        {children}
+        <Navbar />
+        <div className="main-content">
+          {children}
+        </div>
       </body>
     </html>
   );
