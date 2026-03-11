@@ -35,14 +35,14 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@tailwindcss/postcss7-compat": "^2.2.17",
+    "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^24.9.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "autoprefixer": "^9.8.8",
+    "baseline-browser-mapping": "^2.10.0",
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.0.1",
-    "postcss": "^7.0.39",
+    "postcss": "^8.5.8",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3"
   }
