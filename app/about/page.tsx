@@ -5,7 +5,6 @@ const models = [
   {
     name: "openrouter/free (Quality)",
     status: "Primary",
-    statusColor: "var(--accent)",
     specs: [
       "Auto-routes to a free model on OpenRouter",
       "Default model: openrouter/free",
@@ -16,7 +15,6 @@ const models = [
   {
     name: "openrouter/free (Fast)",
     status: "Fallback",
-    statusColor: "var(--text-muted)",
     specs: [
       "Auto-routes to a free model on OpenRouter",
       "Default model: openrouter/free",
@@ -53,7 +51,7 @@ export default function About() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1 className="text-2xl font-bold mb-2 gradient-text">
+          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             About 404 Intelligence
           </h1>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -99,7 +97,7 @@ export default function About() {
                   <span
                     className="text-[11px] font-medium px-2 py-0.5 rounded-full"
                     style={{
-                      color: model.statusColor,
+                      color: model.status === 'Primary' ? 'var(--accent)' : 'var(--text-muted)',
                       background: model.status === 'Primary' ? 'var(--accent-subtle)' : 'var(--bg-elevated)',
                     }}
                   >
