@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 
 export const metadata: Metadata = {
   title: "404 — Intelligence Not Found",
-  description: "A stateless AI assistant with zero memory retention. Powered by Mistral-Small and Ministral-3B.",
+  description: "A stateless AI assistant with zero memory retention. Powered by OpenRouter free models.",
 };
 
 export default function RootLayout({

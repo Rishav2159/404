@@ -34,7 +34,7 @@ export default function Contact() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1 className="text-2xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-2xl font-bold mb-2 gradient-text">
             Get in touch
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>

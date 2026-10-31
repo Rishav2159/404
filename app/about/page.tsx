@@ -3,42 +3,43 @@ import { motion } from "framer-motion";
 
 const models = [
   {
-    name: "Mistral-Small",
+    name: "openrouter/free (Quality)",
     status: "Primary",
     statusColor: "var(--accent)",
     specs: [
-      "High throughput logic routing",
-      "32k base context window",
-      "Optimized for concise, accurate outputs",
-      "Low latency inference",
+      "Auto-routes to a free model on OpenRouter",
+      "Default model: openrouter/free",
+      "Optimized for accurate, structured outputs",
+      "Streaming responses",
     ],
   },
   {
-    name: "Ministral-3B",
+    name: "openrouter/free (Fast)",
     status: "Fallback",
     statusColor: "var(--text-muted)",
     specs: [
-      "Enhanced context understanding",
-      "3B parameter foundation model",
-      "Robust reasoning capabilities",
+      "Auto-routes to a free model on OpenRouter",
+      "Default model: openrouter/free",
+      "Lower latency via fast variant",
       "Efficient resource utilization",
     ],
   },
 ];
 
 const metrics = [
-  { label: "Response Latency", value: "<500ms" },
+  { label: "Response Latency", value: "<2s" },
   { label: "Memory Utilization", value: "0.0 MB" },
-  { label: "Token Processing", value: "4K/request" },
-  { label: "Model Switch Time", value: "50ms" },
+  { label: "Context Window", value: "32K" },
+  { label: "Model Switch Time", value: "instant" },
 ];
 
 const techStack = [
-  "Next.js with React Server Components",
-  "Tailwind CSS with custom design system",
+  "Next.js 16 with React 19",
+  "Tailwind CSS v4 with custom design system",
   "Framer Motion for transitions",
   "React Hooks with local storage integration",
-  "Dual model pipeline with fallback support",
+  "OpenRouter free model pipeline (quality + fast)",
+  "Server-Sent Events streaming",
 ];
 
 export default function About() {
@@ -52,7 +53,7 @@ export default function About() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1 className="text-2xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-2xl font-bold mb-2 gradient-text">
             About 404 Intelligence
           </h1>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -74,7 +75,8 @@ export default function About() {
               404 Intelligence represents a deliberate challenge to traditional machine learning paradigms.
               By implementing complete memory erasure between sessions, the system operates without persistent
               conversational buffers or vector databases. Each query-response cycle is completely isolated,
-              ensuring zero data retention — simulating a pure, stateless consciousness loop.
+              ensuring zero data retention — simulating a pure, stateless consciousness loop. Inference is
+              routed through OpenRouter using free, open-weights models.
             </p>
           </div>
         </motion.section>
@@ -178,8 +180,8 @@ export default function About() {
           <div className="surface-card p-5">
             <p className="text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               This project explores the potential of multi-model stateless AI systems, challenging the
-              assumption that accumulated knowledge is necessary for meaningful interaction. By leveraging
-              both Mistral-Small and Ministral-3B, we achieve robust performance while maintaining
+              assumption that accumulated knowledge is necessary for meaningful interaction. By routing
+              through OpenRouter's free model tier, we achieve robust performance while maintaining
               zero-state architecture — suggesting new possibilities in ephemeral intelligence and
               privacy-first AI design.
             </p>
@@ -189,7 +191,7 @@ export default function About() {
         {/* Footer */}
         <div className="text-center space-y-0.5">
           <p className="text-[11px]" style={{ color: 'var(--text-faint)' }}>
-            v1.0.0 • Production • Last deployed 2025
+            v2.0.0 • OpenRouter • Last updated 2026
           </p>
         </div>
       </div>

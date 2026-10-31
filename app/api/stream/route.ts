@@ -29,10 +29,21 @@ export async function POST(req: Request) {
             }
         }
 
-        const { prompt, messages = [], model, systemPrompt, isRegenerate } = await req.json();
+        let body: any;
+        try { body = await req.json(); } catch { body = null; }
+        if (!body) {
+            return NextResponse.json({ error: 'Invalid request body.' }, { status: 400 });
+        }
+        const { prompt, messages = [], model, systemPrompt, isRegenerate } = body;
 
         if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
             return NextResponse.json({ error: 'Please enter a message.' }, { status: 400 });
+        }
+        if (prompt.length > 8000) {
+            return NextResponse.json({ error: 'Message is too long (max 8000 characters).' }, { status: 413 });
+        }
+        if (typeof systemPrompt === 'string' && systemPrompt.length > 2000) {
+            return NextResponse.json({ error: 'System prompt is too long (max 2000 characters).' }, { status: 413 });
         }
 
         const encoder = new TextEncoder();

@@ -1,13 +1,14 @@
-// Groq API — Supports model switching and custom system prompts
+// OpenRouter API — OpenAI-compatible gateway to free OSS models.
+// Supports model switching (quality/fast) and custom system prompts.
 
 const MODELS = {
-    'quality': 'llama-3.3-70b-versatile',
-    'fast': 'llama-3.1-8b-instant',
+    'quality': process.env.OPENROUTER_MODEL_QUALITY || 'openrouter/free',
+    'fast': process.env.OPENROUTER_MODEL_FAST || 'openrouter/free',
 } as const;
 
 type ModelMode = keyof typeof MODELS;
 
-// LRU Cache
+// LRU Cache for identical recent prompts
 class LRUCache {
     private cache: Map<string, { value: string; timestamp: number }>;
     private maxSize: number;
@@ -52,9 +53,9 @@ export async function streamChat(
     onToken: (token: string) => void,
     options?: { model?: ModelMode; systemPrompt?: string; isRegenerate?: boolean }
 ): Promise<string> {
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
-    if (!GROQ_API_KEY) {
-        throw new Error("GROQ_API_KEY is not set. Get a free key at console.groq.com/keys");
+    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+    if (!OPENROUTER_API_KEY) {
+        throw new Error("OPENROUTER_API_KEY is not set. Get a free key at openrouter.ai/keys");
     }
 
     if (!prompt?.trim()) throw new Error("Message cannot be empty");
@@ -88,27 +89,44 @@ export async function streamChat(
 
     messages.push({ role: 'user', content: prompt });
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90_000);
+
+    let response: Response;
+    try {
+        response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
-            "Authorization": `Bearer ${GROQ_API_KEY}`,
-            "Content-Type": "application/json"
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+            "X-Title": "404 Intelligence",
         },
         body: JSON.stringify({
             model: modelId,
             messages,
-            max_tokens: 1024,
-            temperature: options?.isRegenerate ? 0.8 : 0.3,
+            max_tokens: 2048,
+            temperature: options?.isRegenerate ? 0.8 : 0.4,
             top_p: 0.9,
-            stream: true
-        })
-    });
+            stream: true,
+        }),
+            signal: controller.signal,
+        });
+    } catch (err) {
+        clearTimeout(timeout);
+        if (err instanceof Error && err.name === 'AbortError') {
+            throw new Error('Request timed out. Please try again.');
+        }
+        throw err;
+    }
+    clearTimeout(timeout);
 
     if (!response.ok) {
         const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-        console.error("[chat] Groq error:", response.status, error);
-        if (response.status === 401) throw new Error('Invalid API key. Get a free key at console.groq.com/keys');
+        console.error("[chat] OpenRouter error:", response.status, error);
+        if (response.status === 401) throw new Error('Invalid OpenRouter API key. Get a free key at openrouter.ai/keys');
         if (response.status === 429) throw new Error('Rate limit reached. Please wait a moment and try again.');
+        if (response.status === 402) throw new Error('Insufficient credits. Free models may be temporarily unavailable.');
         throw new Error(error.error?.message || 'AI service error');
     }
 
@@ -124,14 +142,15 @@ export async function streamChat(
             const { done, value } = await reader.read();
             if (done) break;
 
-            buffer += decoder.decode(value);
+            buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split('\n');
             buffer = lines.pop() || '';
 
             for (const line of lines) {
                 if (!line.startsWith('data: ') || line.trim() === 'data: [DONE]') continue;
                 try {
-                    const token = JSON.parse(line.slice(6)).choices?.[0]?.delta?.content;
+                    const parsed = JSON.parse(line.slice(6));
+                    const token = parsed.choices?.[0]?.delta?.content;
                     if (token) {
                         fullResponse += token;
                         onToken(token);
@@ -140,7 +159,7 @@ export async function streamChat(
             }
         }
 
-        if (!options?.isRegenerate) {
+        if (!options?.isRegenerate && fullResponse) {
             responseCache.add(cacheKey, fullResponse);
         }
         return fullResponse;
