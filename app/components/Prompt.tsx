@@ -153,7 +153,7 @@ const MessageBubble = ({ message, index, isLast, model, isLoading, copiedIndex, 
 
                         {isUser && (
                             <div className="absolute -right-1 -bottom-3 w-3 h-3 -rotate-45"
-                                style={{ borderTopRight: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }} />
+                                style={{ borderRight: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }} />
                         )}
 
                         {!isUser && isLast && (
